@@ -275,7 +275,23 @@ form{backdrop-filter:none;-webkit-backdrop-filter:none}
 #top #bg{background:linear-gradient(180deg,rgba(50,27,37,.25),rgba(22,13,18,.15))!important}
 #top:after{background:linear-gradient(rgba(22,13,18,.35),transparent 40%,rgba(22,13,18,.25))!important}
 #diferenciais,#essencia{background:transparent!important}#depoimentos{background:rgba(50,27,37,.35)!important}
-.fade{display:none}</style></head>
+.fade{display:none}</style><style id="perf-mobile">
+/* ===== correção de desempenho no celular: rolagem dos cartões de serviços ===== */
+/* camadas de GPU a menos: as fotos dos cartões deixam de ser camadas próprias (eram 8 texturas grandes sempre vivas) */
+.cimg img{will-change:auto}
+@media(max-width:1023px){
+/* cabeçalho fixo com blur recalculava o fundo em movimento a cada quadro; agora é um fundo quase opaco, mesmo visual */
+header{background:rgba(22,13,18,.94);backdrop-filter:none;-webkit-backdrop-filter:none}
+#menu{backdrop-filter:none;-webkit-backdrop-filter:none}
+/* sem o zoom da foto no celular: não há transform animado dentro do cartão com cantos arredondados */
+.cimg img{transform:none!important}
+/* cada cartão passa a ser isolado, para o navegador não repintar os vizinhos */
+.cin{contain:layout paint}
+}
+/* três brilhos de 75vmax por cima da flor de fundo ocupavam dezenas de MB de textura no celular */
+@media(max-width:767px){#lux .lg{display:none!important}}
+</style>
+</head>
 <body>
 <header><div class="bar">
 <a class="logo" href="#top">Maison Belle <i>Studio</i></a>
@@ -427,10 +443,10 @@ var im=mkImg();im.alt='';im.src=PIC.s[i];im.style.objectPosition=PIC.p[i];$('.ci
 $('.btn',c).onclick=function(){pick(s[0])};sv.appendChild(c);$$('.rv',c).forEach(function(e){io.observe(e)});
 var op=document.createElement('option');op.value=s[0];op.textContent=s[1];sel.appendChild(op)});
 /* rolagem: o cartão anterior recua e escurece, a foto assenta com zoom suave */
-var cards=$$('.card',sv),tk=false,svOn=true,plOn=true,cin=cards.map(function(c){return c.firstChild}),cimg=cards.map(function(c){return $('img',c)}),dk=cards.map(function(c){var d=document.createElement('i');d.className='cdk';c.firstChild.appendChild(d);return d}),last=[];
+var cards=$$('.card',sv),zoomOn=!matchMedia('(max-width:1023px)').matches,tk=false,svOn=true,plOn=true,cin=cards.map(function(c){return c.firstChild}),cimg=cards.map(function(c){return $('img',c)}),dk=cards.map(function(c){var d=document.createElement('i');d.className='cdk';c.firstChild.appendChild(d);return d}),last=[];
 function stk(){tk=false;var vh=innerHeight,n=cards.length,tp=cards.map(function(c){return c.getBoundingClientRect().top});
 cards.forEach(function(c,i){var q=i+1<n?Math.max(0,Math.min(1,tp[i+1]/vh)):1,e=Math.max(0,Math.min(1,1-tp[i]/vh)),a=(1-(1-q)*.06).toFixed(3),o=(.45*(1-q)).toFixed(3),z=(1.14-.14*e).toFixed(3),L=last[i]||(last[i]={});
-if(L.a!==a){L.a=a;cin[i].style.transform='scale('+a+')'}if(L.o!==o){L.o=o;dk[i].style.opacity=o}if(L.z!==z){L.z=z;cimg[i].style.transform='scale('+z+')'}})}
+if(L.a!==a){L.a=a;cin[i].style.transform='scale('+a+')'}if(L.o!==o){L.o=o;dk[i].style.opacity=o}if(zoomOn&&L.z!==z){L.z=z;cimg[i].style.transform='scale('+z+')'}})}
 function pick(id){sel.value=id;$('#agendamento').scrollIntoView({behavior:reduce?'auto':'smooth'})}
 /* pillars parallax */
 var nums=$$('.pl .n');function par(){var vh=innerHeight,v=nums.map(function(n){var r=n.parentNode.getBoundingClientRect();return(r.top+r.height/2-vh/2)/vh});nums.forEach(function(n,i){n.style.transform='translateY('+(v[i]*-60).toFixed(1)+'px)'})}
